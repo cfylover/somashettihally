@@ -95,15 +95,15 @@ const start = async () => {
     // Note: User model's pre('save') hook auto-hashes passwords, so we pass plaintext here
     try {
       const userCount = await User.countDocuments();
-      if (process.env.NODE_ENV !== "production" && userCount === 0) {
-        console.log("No users found — seeding default dev users (admin/member)");
+      if (userCount === 0) {
+        console.log("No users found — seeding default users (admin/member)");
 
         await User.create([
           { username: "admin", password: "admin123", role: "Admin" },
           { username: "member", password: "member123", role: "Member" },
         ]);
 
-        console.log("✅ Default dev users created: admin/member");
+        console.log("✅ Default users created: admin/member");
       }
     } catch (seedErr) {
       console.error("❌ Error while seeding default users:", seedErr);

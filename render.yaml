@@ -1,34 +1,21 @@
 services:
-  # MongoDB Atlas (external) - configure MONGO_URI env var
-  
-  # Backend API
+  # ─── Backend API (Node.js Web Service) ──────────────────────────────
   - type: web
     name: agraja-sangam-api
     runtime: node
     region: oregon
     plan: starter
-    buildCommand: cd server && npm install
+    rootDir: server
+    buildCommand: npm install
     startCommand: node server.js
     envVars:
       - key: NODE_ENV
         value: production
       - key: MONGO_URI
-        sync: false  # Set manually in Render dashboard
+        sync: false  # ⚠️ Set this manually in Render Dashboard
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
-        value: https://agraja-sangam-client.onrender.com
+        sync: false  # Set to your client URL after deploying frontend
       - key: PORT
         value: 5000
-
-  # Frontend (React/Vite - built as static site)
-  - type: web
-    name: agraja-sangam-client
-    runtime: static
-    region: oregon
-    plan: free
-    buildCommand: cd client && npm install && npm run build
-    staticPublishPath: client/dist
-    envVars:
-      - key: VITE_API_URL
-        value: https://agraja-sangam-api.onrender.com
