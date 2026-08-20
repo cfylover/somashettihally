@@ -195,12 +195,13 @@ const start = async () => {
   if (mongoUri) {
     // Ensure database name is in the connection string
     let uri = mongoUri;
-    if (!uri.includes("/agraja-sangam")) {
-      uri = uri.replace(/\?.*$/, ""); // strip any query params temporarily
-      uri = uri.endsWith("/") ? uri + "agraja-sangam" : uri + "/agraja-sangam";
-      // Re-append original query params if any
-      const origQuery = mongoUri.split("?")[1];
-      if (origQuery) uri += "?" + origQuery;
+    const hasDbName = /\/agraja[-_]sangam(\b|\?)/.test(uri);
+    if (!hasDbName) {
+      const queryIndex = uri.indexOf("?");
+      const baseUri = queryIndex !== -1 ? uri.substring(0, queryIndex) : uri;
+      const queryString = queryIndex !== -1 ? uri.substring(queryIndex) : "";
+      uri = baseUri.endsWith("/") ? baseUri + "agraja-sangam" : baseUri + "/agraja-sangam";
+      if (queryString) uri += queryString;
     }
     await mongoose.connect(uri, {
       serverSelectionTimeoutMS: 10000,
