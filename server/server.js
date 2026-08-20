@@ -87,8 +87,19 @@ app.use((err, req, res, next) => {
 });
 
 const start = async () => {
-  if (process.env.MONGO_URI) {
-    await mongoose.connect(process.env.MONGO_URI);
+  // Accept either MONGO_URI or MONGODB_URI (Render may set either)
+  const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
+  if (mongoUri) {
+    // Ensure database name is in the connection string
+    let uri = mongoUri;
+    if (!uri.includes("/agraja-sangam")) {
+      uri = uri.replace(/\?.*$/, ""); // strip any query params temporarily
+      uri = uri.endsWith("/") ? uri + "agraja-sangam" : uri + "/agraja-sangam";
+      // Re-append original query params if any
+      const origQuery = mongoUri.split("?")[1];
+      if (origQuery) uri += "?" + origQuery;
+    }
+    await mongoose.connect(uri);
     console.log("MongoDB connected");
 
     // If running in development and there are no users, seed fallback admin/member
