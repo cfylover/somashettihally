@@ -201,7 +201,10 @@ const start = async () => {
       const origQuery = mongoUri.split("?")[1];
       if (origQuery) uri += "?" + origQuery;
     }
-    await mongoose.connect(uri);
+    await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 10000,
+      heartbeatFrequencyMS: 30000,
+    });
     console.log("MongoDB connected");
 
     // If running in development and there are no users, seed fallback admin/member
