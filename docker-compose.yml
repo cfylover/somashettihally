@@ -1,0 +1,36 @@
+services:
+  mongo:
+    image: mongo:6
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+
+  server:
+    build:
+      context: ./server
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/agraja-sangam
+      - FRONTEND_URL=http://localhost:5173
+      - PORT=5000
+      - JWT_SECRET=ganapathi_secret_key_2026
+    ports:
+      - "5000:5000"
+
+  client:
+    build:
+      context: ./client
+    restart: unless-stopped
+    environment:
+      - VITE_HOST=0.0.0.0
+    ports:
+      - "5173:5173"
+    # Use the built image's node_modules and source copy to avoid host-volume overwriting node_modules
+    command: ["npm", "run", "dev"]
+
+volumes:
+  mongo-data:

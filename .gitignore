@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.*
+*.env
+server/.env
+server.env
+dist/
+client/dist/
+server/uploads/*
+!.gitkeep
+.DS_Store
+npm-debug.log*
+*.log
