@@ -28,6 +28,7 @@ const FRONTEND_URL = process.env.FRONTEND_URL;
 
 const allowedOrigins = [
   FRONTEND_URL,
+  "https://somashettihally.onrender.com",
   "http://localhost:5173",
   "http://127.0.0.1:5173",
 ].filter(Boolean);
@@ -35,7 +36,7 @@ const allowedOrigins = [
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".onrender.com")) {
         callback(null, true);
         return;
       }
