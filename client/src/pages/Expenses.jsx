@@ -172,6 +172,11 @@ export default function Expenses() {
     return map;
   }, [expenses]);
 
+  const allCategories = useMemo(() => {
+    const dynamic = Object.keys(categoryTotals).filter((c) => !CATEGORIES.includes(c));
+    return [...CATEGORIES.filter((c) => c !== "Others"), ...dynamic, "Others"];
+  }, [categoryTotals]);
+
   const pieData = {
     labels: Object.keys(categoryTotals),
     datasets: [{
@@ -379,7 +384,7 @@ export default function Expenses() {
               className="border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-orange-500"
             >
               <option value="">All Categories</option>
-              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              {allCategories.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
             <select
               value={sort}

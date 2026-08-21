@@ -47,12 +47,15 @@ const FieldWrapper = ({ icon, children }) => (
 
 export default function ExpenseModal({ editingExpense, onClose, onSave }) {
   const [form, setForm] = useState(emptyForm);
+  const [customCategory, setCustomCategory] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (editingExpense) {
+      const cat = editingExpense.category || "Decoration";
+      const isCustom = !CATEGORIES.includes(cat);
       setForm({
-        category: editingExpense.category || "Decoration",
+        category: isCustom ? "Others" : cat,
         title: editingExpense.title || "",
         amount: editingExpense.amount ?? "",
         paidTo: editingExpense.paidTo || "",
@@ -62,8 +65,10 @@ export default function ExpenseModal({ editingExpense, onClose, onSave }) {
           : new Date().toISOString().split("T")[0],
         description: editingExpense.description || "",
       });
+      setCustomCategory(isCustom ? cat : "");
     } else {
       setForm(emptyForm);
+      setCustomCategory("");
     }
   }, [editingExpense]);
 
@@ -84,9 +89,13 @@ export default function ExpenseModal({ editingExpense, onClose, onSave }) {
       return;
     }
 
+    const finalCategory = form.category === "Others" && customCategory.trim()
+      ? customCategory.trim()
+      : form.category;
+
     setSaving(true);
     try {
-      await onSave(form);
+      await onSave({ ...form, category: finalCategory });
       onClose();
     } catch (err) {
       console.error("❌ Expense save error:", err);
@@ -145,6 +154,15 @@ export default function ExpenseModal({ editingExpense, onClose, onSave }) {
                   </option>
                 ))}
               </select>
+              {form.category === "Others" && (
+                <input
+                  type="text"
+                  value={customCategory}
+                  onChange={(e) => setCustomCategory(e.target.value)}
+                  placeholder="Enter custom category..."
+                  className="mt-2 w-full bg-gray-50 border border-gray-300 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-800"
+                />
+              )}
             </div>
 
             <div>

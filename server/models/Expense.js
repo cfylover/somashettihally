@@ -4,16 +4,7 @@ const expenseSchema = new mongoose.Schema(
   {
     category: {
       type: String,
-      enum: [
-        "Decoration",
-        "Sound",
-        "Food",
-        "Lighting",
-        "Flowers",
-        "Security",
-        "Transportation",
-        "Others",
-      ],
+      trim: true,
       default: "Others",
     },
 
