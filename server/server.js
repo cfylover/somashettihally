@@ -195,7 +195,7 @@ const start = async () => {
   if (mongoUri) {
     // Ensure database name is in the connection string
     let uri = mongoUri;
-    const hasDbName = /\/agraja[-_]sangam(\b|\?)/.test(uri);
+    const hasDbName = /\/(agraja[-_]sangam|ganapati)(\b|\?)/.test(uri);
     if (!hasDbName) {
       const queryIndex = uri.indexOf("?");
       const baseUri = queryIndex !== -1 ? uri.substring(0, queryIndex) : uri;
