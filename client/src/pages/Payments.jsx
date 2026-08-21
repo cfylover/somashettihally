@@ -162,7 +162,7 @@ export default function Payments() {
       await fetchAll();
       window.dispatchEvent(new Event("payment-updated"));
     } catch (err) {
-      console.error("❌ Payment error:", err.response?.data, err.message);
+      console.error("❌ Payment error:", err.response?.status, err.response?.data?.message || err.message);
       showToast(err.response?.data?.message || "Failed to record payment", "error");
     } finally {
       setSaving(false);

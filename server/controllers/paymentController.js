@@ -71,15 +71,19 @@ const addPayment = async (req, res) => {
     const method = paymentMethod || "Cash";
     const pDate = paymentDate ? new Date(paymentDate) : new Date();
 
-    // generate receipt
+    // generate receipt number (non-critical — fallback to timestamp on failure)
     let receiptNumber = null;
-    for (let i = 0; i < 3; i++) {
-      const candidate = await generateReceiptNumber();
-      const exists = await Payment.exists({ receiptNumber: candidate });
-      if (!exists) {
-        receiptNumber = candidate;
-        break;
+    try {
+      for (let i = 0; i < 3; i++) {
+        const candidate = await generateReceiptNumber();
+        const exists = await Payment.exists({ receiptNumber: candidate });
+        if (!exists) {
+          receiptNumber = candidate;
+          break;
+        }
       }
+    } catch (genErr) {
+      console.warn("Receipt number generation failed:", genErr.message);
     }
     if (!receiptNumber) receiptNumber = `AGS-${Date.now()}`;
 
@@ -95,7 +99,7 @@ const addPayment = async (req, res) => {
       status: status || "Pending",
     });
 
-    // create a system receipt
+    // create a system receipt (non-critical)
     try {
       await createReceipt({
         sourceType: "payment",
@@ -115,7 +119,28 @@ const addPayment = async (req, res) => {
     res.status(201).json({ message: "Payment recorded", payment: created });
   } catch (err) {
     console.error("Error in addPayment:", err);
-    res.status(400).json({ message: err.message || "Failed to record payment" });
+
+    // Distinguish client errors (validation) from server errors (DB, etc.)
+    const isValidationError =
+      err.message === "payerName and amount are required" ||
+      err.message === "Invalid amount";
+
+    if (isValidationError) {
+      return res.status(400).json({ message: err.message });
+    }
+
+    // Mongoose validation errors (e.g. invalid enum value)
+    if (err.name === "ValidationError") {
+      const messages = Object.values(err.errors).map((e) => e.message);
+      return res.status(400).json({ message: messages.join(", ") });
+    }
+
+    // Mongoose duplicate key error
+    if (err.code === 11000) {
+      return res.status(400).json({ message: "Duplicate receipt number — please try again" });
+    }
+
+    res.status(500).json({ message: err.message || "Failed to record payment" });
   }
 };
 
